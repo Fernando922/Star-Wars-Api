@@ -1,20 +1,5 @@
 const app = require('express')();
 const axios = require('axios');
-const baseURL = 'https://swapi.co/api/';
-
-const getFilmId = (url) => {
-  const id = url.split('/')[5];
-  return Number(id);
-}
-
-const getCharacterImageUrl = (url) => {
-  const getCharacterId = url.split('/')[5];
-  return `https://starwars-visualguide.com/assets/img/characters/${getCharacterId}.jpg`;
-}
-
-const getFilmImageUrl = (id) => {
-  return `https://starwars-visualguide.com/assets/img/films/${id}.jpg`;
-}
 
 app.use((req, res, next) => {
   res.header('Content-Type', 'application/json; charset=utf-8');
@@ -28,10 +13,28 @@ app.use((req, res, next) => {
   next();
 });
 
+const baseURL = 'https://swapi.co/api/';
+
+
+const getFilmId = (url) => {
+  const id = url.split('/')[5];
+  return Number(id);
+}
+
+const getFilmImageUrl = (id) => {
+  return `https://starwars-visualguide.com/assets/img/films/${id}.jpg`;
+}
+
+const getCharacterImageUrl = (url) => {
+  const getCharacterId = url.split('/')[5];
+  return `https://starwars-visualguide.com/assets/img/characters/${getCharacterId}.jpg`;
+}
+
 app.get('/films', async (req, res, next) => {
   try {
     const { data: { results } } = await axios.request({ baseURL, url: 'films' });
     results.forEach(x => x.id = getFilmId(x.url));
+    results.forEach(x => x.photo = getFilmImageUrl(x.id));
     return res.send(results).status(200);
   } catch (error) {
     console.error(error);
@@ -40,6 +43,7 @@ app.get('/films', async (req, res, next) => {
 });
 
 app.get('/films/:id', async (req, res, next) => {
+
   try {
     const filmId = req.params.id;
     const { data } = await axios.request({ baseURL, url: `films/${filmId}` });
